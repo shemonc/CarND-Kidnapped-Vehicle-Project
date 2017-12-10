@@ -192,14 +192,16 @@ ParticleFilter::dataAssociation (std::vector<LandmarkObs> predicted,
             euclidean_distance = dist(obj.x, obj.y, pred.x, pred.y);
             if (euclidean_distance < min_assoc_distance) {
                 min_assoc_distance = euclidean_distance;
-                id = pred.id;
+
+                /*
+                 * save the index of the closest predicted landmark
+                 * in the id of the observed landmark, for
+                 * a quick lookup later on.
+                 */
+                obj.id = n;
             }
         }
         
-        /*
-         * associate the closet landmrk id.
-         */
-        obj.id = id;
     }
 }
 
@@ -354,15 +356,14 @@ ParticleFilter::updateWeights (double sensor_range, double std_landmark[],
              * will be saved to each patrciles weight variable i.e.
              * particles[ix].weight;
              */
-            for (m = 0; m < t_plus_1_predic.size(); m++) {
-                if (t_plus_1_predic[m].id == observe_id) {
+            if (t_plus_1_measure[n].id != -1) {
 
-                    /*
-                     * a closest match it found
-                     */
-                    x_part = t_plus_1_predic[m].x;
-                    y_part = t_plus_1_predic[m].y;
-                }
+                /*
+                 * Index of matching predict 
+                 */
+                int k = t_plus_1_measure[n].id;
+                x_part = t_plus_1_predic[k].x;
+                y_part = t_plus_1_predic[k].y;
             }
 
             dx = x_part - x_map;
